@@ -4,19 +4,16 @@ from pathlib import Path
 import jaconv
 from tqdm import tqdm
 
-line_list = Path("./skk-station-tdmelodic_ipa.csv").read_text(encoding="utf-8")
+line_list = Path("./dmime-tdmelodic_ipa.csv").read_text(encoding="utf-8")
 line_list = line_list.split("\n")
 
 KOMOJI_PATTERN = re.compile("[ァィゥェォッャュョ]")
-DOWN_PATTERN = re.compile(".+\].+\].+")
+DOWN_PATTERN = re.compile(".+\[.+\].+")
 komoji_list = ["ァ","ィ","ゥ","ェ","ォ""ッ","ャ","ュ","ョ"]
 kana_list = ["ア","イ","ウ","エ","オ","ツ","ヤ","ユ","ヨ"]
 out_list = []
 
-UP_DOWN_PATTERN = re.compile(".+\[.+\].+")
-DOWN_UP_PATTERN = re.compile(".+\].+\[].+")
-
-for line in line_list:
+for line in tqdm(line_list):
 
     line = line.split(",")
     if len(line) == 13:
@@ -44,36 +41,32 @@ for line in line_list:
             # 平板型に設定
             out = f"0/{mora}"
 
-        #下降だけする場合
-        elif "]" in acc and "[" not in acc:
+        #最初アクセント核の時頭高型に
+        if len(acc) != 1 and acc[1] == "]":
+            out = f"1/{mora}"
+
+        #下降する場合
+        else:
             
             if DOWN_PATTERN.fullmatch(acc):
 
-                down_acc_position2 = acc.replace("]", "|", 1).find("]") -2
-                 
-                mora02 = mora - down_acc_position2  
-                mora01 = mora - mora02 
+                down_acc_position2 = acc.find("]") -1
 
-                if KOMOJI_PATTERN.match(yomi[down_acc_position2]): 
-                    acc = down_acc_position2 -1
+                if down_acc_position2 < len(yomi) and KOMOJI_PATTERN.match(yomi[down_acc_position2]): 
+                    acc2 = down_acc_position2 -1
                 else: 
-                    acc = down_acc_position2
+                    acc2 = down_acc_position2
 
+                out = f"{acc2}/{mora}"
         
-                out = f"0/{acc}"
-        
-        #そうでない場合は平型
-        else:
+            else:
                 out = f"0/{mora}"
 
         kanji = line[0]
 
-        if "-" in out:
-            out = f"{0}/{mora}"
-
         out_line = line[:10] + [kanji, yomi, yomi, out, "*", line[12]] 
-        print(out_line)
+        #print(out_line)
 
         out_list.append( ",".join(out_line) )
     
-Path("./skk-station-tdmelodic_ipa-jtalk.csv").write_text("\n".join(out_list) , encoding="utf-8")  
+Path("./dmime.csv").write_text("\n".join(out_list) , encoding="utf-8")  
