@@ -4,11 +4,11 @@ from pathlib import Path
 import jaconv
 from tqdm import tqdm
 
-line_list = Path("./dmime-tdmelodic_ipa.csv").read_text(encoding="utf-8")
+line_list = Path("./medic-tdmelodic_ipa.csv").read_text(encoding="utf-8")
 line_list = line_list.split("\n")
 
-KOMOJI_PATTERN = re.compile("[ァィゥェォッャュョ]")
-DOWN_PATTERN = re.compile(".+\[.+\].+")
+KOMOJI_PATTERN = re.compile(r"[ァィゥェォッャュョ]")
+DOWN_PATTERN = re.compile(r".+\[.+\].+")
 komoji_list = ["ァ","ィ","ゥ","ェ","ォ""ッ","ャ","ュ","ョ"]
 kana_list = ["ア","イ","ウ","エ","オ","ツ","ヤ","ユ","ヨ"]
 out_list = []
@@ -69,4 +69,4 @@ for line in tqdm(line_list):
 
         out_list.append( ",".join(out_line) )
     
-Path("./dmime.csv").write_text("\n".join(out_list) , encoding="utf-8")  
+Path("./medic.csv").write_text("\n".join(out_list) , encoding="utf-8")  
